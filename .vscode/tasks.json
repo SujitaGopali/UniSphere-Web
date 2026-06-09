@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "mongodb: start",
+      "type": "shell",
+      "command": "& '${env:ProgramFiles}\\MongoDB\\Server\\8.0\\bin\\mongod.exe' --dbpath 'C:\\data\\db'",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "unisphere"
+      },
+      "problemMatcher": {
+        "owner": "mongodb",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Waiting for connections"
+        }
+      }
+    },
+    {
+      "label": "backend: dev",
+      "type": "npm",
+      "script": "dev",
+      "path": "backend",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "unisphere"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Server running on"
+        }
+      }
+    },
+    {
+      "label": "frontend: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+        "env": { "PORT": "3001" }
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "unisphere"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Ready in"
+        }
+      }
+    },
+    {
+      "label": "Run Full Stack",
+      "dependsOn": ["mongodb: start", "backend: dev", "frontend: dev"],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Unisphere_web — Sprint 2 Monorepo
 
-## Getting Started
+Full-stack registration and login flow with a layered Express backend and Next.js frontend.
 
-First, run the development server:
+## Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+unisphere_web/
+├── backend/     # Express + TypeScript + MongoDB
+├── frontend/    # Next.js 16 + React 19
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Backend (`backend/`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Stack:** Express 5, MongoDB, Mongoose, Zod, bcryptjs, JWT
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Architecture:** Route → Controller → Service → Repository → Model
 
-## Learn More
+**Endpoints:**
+- `POST /api/v1/auth/register` — register a new user
+- `POST /api/v1/auth/login` — login and receive JWT
 
-To learn more about Next.js, take a look at the following resources:
+### Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd backend
+cp .env.example .env
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Server runs at `http://localhost:8089`
 
-## Deploy on Vercel
+## Frontend (`frontend/`)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Stack:** Next.js 16, React 19, Tailwind CSS v4, react-hook-form, Zod, axios
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Architecture:** Component → Server Action → API → Backend
+
+**Pages:**
+- `/` — homepage
+- `/register` — registration form
+- `/login` — login form (sets cookies, redirects to dashboard)
+- `/dashboard` — protected welcome page
+
+### Setup
+
+```bash
+cd frontend
+cp .env.local.example .env.local
+npm install
+npm run dev
+```
+
+App runs at `http://localhost:3000`
+
+## Test Flow
+
+1. Start MongoDB locally
+2. Run backend: `cd backend && npm run dev`
+3. Run frontend: `cd frontend && npm run dev`
+4. Register at `/register`
+5. Login at `/login`
+6. Dashboard shows "Welcome, {firstName}"
