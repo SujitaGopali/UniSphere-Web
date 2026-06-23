@@ -42,6 +42,11 @@ export async function getUserData(): Promise<Record<string, unknown> | null> {
   }
 }
 
+export async function getTokenCookie(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get(AUTH_TOKEN_KEY)?.value || null;
+}
+
 export async function clearAuthCookies() {
   const cookieStore = await cookies();
   cookieStore.delete(AUTH_TOKEN_KEY);
