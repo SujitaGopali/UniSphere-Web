@@ -74,4 +74,54 @@ export class UserController {
       res.status(500).json(ApiResponseHelper.error(500, "Internal server error"));
     }
   };
+
+  whoami = async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json(ApiResponseHelper.error(401, "Unauthorized"));
+        return;
+      }
+
+      const userObj = req.user.toObject();
+      const { password: _password, ...userWithoutPassword } = userObj;
+
+      res
+        .status(200)
+        .json(ApiResponseHelper.success(200, "User detail retrieved", userWithoutPassword));
+    } catch (error) {
+      console.error(error);
+      res.status(500).json(ApiResponseHelper.error(500, "Internal server error"));
+    }
+  };
+
+  updateProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json(ApiResponseHelper.error(401, "Unauthorized"));
+        return;
+      }
+
+      const userId = req.user._id.toString();
+
+      let profileImagePath: string | undefined = undefined;
+      if (req.file) {
+        profileImagePath = `/uploads/${req.file.filename}`;
+      }
+
+      const updatedUser = await this.userService.updateProfile(userId, req.body, profileImagePath);
+
+      res
+        .status(200)
+        .json(ApiResponseHelper.success(200, "Profile updated successfully", updatedUser));
+    } catch (error) {
+      if (error instanceof HttpException) {
+        res
+          .status(error.status)
+          .json(ApiResponseHelper.error(error.status, error.message));
+        return;
+      }
+      console.error(error);
+      res.status(500).json(ApiResponseHelper.error(500, "Internal server error"));
+    }
+  };
 }

@@ -7,6 +7,7 @@ export interface IUserRepository {
   findByStudentId(studentId: string): Promise<IUser | null>;
   findById(id: string): Promise<IUser | null>;
   create(data: CreateUserDTOType & { password: string; role: "admin" | "user" }): Promise<IUser>;
+  update(id: string, data: Partial<IUser>): Promise<IUser | null>;
 }
 
 export class UserMongoRepository implements IUserRepository {
@@ -31,5 +32,9 @@ export class UserMongoRepository implements IUserRepository {
   ): Promise<IUser> {
     const user = new UserModel(data);
     return user.save();
+  }
+
+  async update(id: string, data: Partial<IUser>): Promise<IUser | null> {
+    return UserModel.findByIdAndUpdate(id, data, { new: true });
   }
 }
