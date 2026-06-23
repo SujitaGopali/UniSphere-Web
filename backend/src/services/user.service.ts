@@ -63,6 +63,45 @@ export class UserService {
     };
   }
 
+  async updateProfile(userId: string, data: any, profileImage?: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new HttpException(404, "User not found");
+    }
+
+    if (data.username && data.username !== user.username) {
+      const existing = await this.userRepository.findByUsername(data.username);
+      if (existing) {
+        throw new HttpException(409, "Username already in use");
+      }
+    }
+
+    if (data.studentId && data.studentId !== user.studentId) {
+      const existing = await this.userRepository.findByStudentId(data.studentId);
+      if (existing) {
+        throw new HttpException(409, "Student ID already in use");
+      }
+    }
+
+    const updateData: any = {};
+    if (data.firstName) updateData.firstName = data.firstName;
+    if (data.lastName) updateData.lastName = data.lastName;
+    if (data.username) updateData.username = data.username;
+    if (data.studentId) updateData.studentId = data.studentId;
+    if (profileImage) updateData.profileImage = profileImage;
+
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
+    const updatedUser = await this.userRepository.update(userId, updateData);
+    if (!updatedUser) {
+      throw new HttpException(500, "Failed to update profile");
+    }
+
+    return this.omitPassword(updatedUser);
+  }
+
   private omitPassword(user: IUser) {
     const userObject = user.toObject();
     const { password: _password, ...userWithoutPassword } = userObject;
