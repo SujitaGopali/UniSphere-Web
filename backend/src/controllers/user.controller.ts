@@ -58,7 +58,10 @@ export class UserController {
         return;
       }
 
-      const result = await this.userService.loginUser(parsed.data);
+      const ipAddress = req.ip || req.socket.remoteAddress || undefined;
+      const userAgent = req.headers['user-agent'] || undefined;
+      
+      const result = await this.userService.loginUser(parsed.data, ipAddress, userAgent);
 
       res
         .status(200)
