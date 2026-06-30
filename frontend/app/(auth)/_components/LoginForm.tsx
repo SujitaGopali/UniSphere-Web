@@ -7,9 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleLoginUser } from "@/lib/actions/auth-action";
 import { loginSchema, LoginFormValues } from "./schema";
+import { useAuth } from "@/lib/context/AuthContext";
 
 export default function LoginForm() {
   const router = useRouter();
+  const { refreshUser, setUser } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,7 +34,17 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      // Update AuthContext with the new user data
+      if (result.data?.user) {
+        setUser(result.data.user as any);
+      }
+
+      // Redirect to admin dashboard if user has admin role
+      const userRole = result.data?.user?.role;
+      console.log('User role from login:', userRole); // Debug logging
+      const redirectPath = userRole === 'admin' ? '/dashboard/admin/users' : '/dashboard';
+      console.log('Redirecting to:', redirectPath); // Debug logging
+      router.push(redirectPath);
       router.refresh();
     });
   };
