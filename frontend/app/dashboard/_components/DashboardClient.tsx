@@ -46,9 +46,22 @@ export default function DashboardClient({ user: serverUser }: DashboardClientPro
             <h1 className="text-3xl font-light uppercase tracking-[1.5px] text-on-dark sm:text-4xl">
               Welcome, {user.firstName || "User"}
             </h1>
+            <p className="text-xs text-muted mt-1">
+              Role: <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                user.role === 'admin' ? 'bg-m-blue-light/10 text-m-blue-light border border-m-blue-light/20' : 'bg-surface-elevated text-body-strong border border-hairline'
+              }`}>{user.role || 'user'}</span>
+            </p>
           </div>
         </div>
         <div className="flex gap-4">
+          {user.role === 'admin' && (
+            <Link
+              href="/dashboard/admin/users"
+              className="inline-flex h-10 items-center rounded bg-m-blue-light px-5 text-xs uppercase tracking-[1.5px] text-canvas transition-colors hover:bg-m-blue-dark"
+            >
+              Admin Panel
+            </Link>
+          )}
           <Link
             href="/dashboard/profile"
             className="inline-flex h-10 items-center rounded border border-hairline px-5 text-xs uppercase tracking-[1.5px] text-body transition-colors hover:border-on-dark"
