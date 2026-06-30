@@ -16,9 +16,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
+import adminUserRoutes from "./routes/admin.user.route";
+import loginHistoryRoutes from "./routes/login-history.route";
+
 app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/registrations", registrationRoutes);
+app.use("/api/v1/admin/users", adminUserRoutes);
+app.use("/api/v1/admin/login-history", loginHistoryRoutes);
 
 // 404 Handler
 app.use((_req: Request, res: Response): void => {
