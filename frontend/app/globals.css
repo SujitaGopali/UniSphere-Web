@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --canvas: #000000;
-  --surface-card: #1a1a1a;
-  --hairline: #3c3c3c;
-  --on-dark: #ffffff;
-  --body: #bbbbbb;
-  --muted: #7e7e7e;
-  --m-red: #e22718;
-  --m-blue-light: #4a9eff;
-  --m-blue-dark: #1a5fb4;
+  color-scheme: light;
+  --canvas: #ffffff;
+  --surface-card: #f8fbff;
+  --hairline: #e2e8f0;
+  --on-dark: #0f172a;
+  --body: #334155;
+  --muted: #64748b;
+  --m-red: #ef4444;
+  --m-blue-light: #60a5fa;
+  --m-blue-dark: #2563eb;
 }
 
 @theme inline {

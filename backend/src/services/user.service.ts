@@ -38,7 +38,7 @@ export class UserService {
     const user = await this.userRepository.create({
       ...data,
       password: hashedPassword,
-      role: "user",
+      role: data.role || "user",
     });
 
     return this.omitPassword(user);
