@@ -9,9 +9,5 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  return (
-    <main className="min-h-screen bg-canvas text-body">
-      <DashboardClient user={user} />
-    </main>
-  );
+  return <DashboardClient user={user} />;
 }
