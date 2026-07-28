@@ -7,7 +7,11 @@ export const CreateEventDTO = EventSchema.pick({
   date: true,
   location: true,
   category: true,
+  eventType: true,
+  college: true,
   capacity: true,
+  cashPrize: true,
+  brochureImage: true,
 });
 
 export const UpdateEventDTO = CreateEventDTO.partial();
