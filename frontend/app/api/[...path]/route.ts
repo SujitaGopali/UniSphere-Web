@@ -17,7 +17,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 }
 
 async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
-  const backendBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8089";
+  const backendBaseUrl = (
+    process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "http://localhost:8089"
+  ).replace(/\/$/, "");
   const pathString = path.join("/");
   const url = `${backendBaseUrl}/api/${pathString}${request.nextUrl.search}`;
 
@@ -34,7 +38,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   }
 
   try {
-    let body: any = null;
+    let body: ArrayBuffer | null = null;
     if (request.method !== "GET" && request.method !== "HEAD") {
       body = await request.arrayBuffer();
     }
@@ -44,14 +48,44 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
       headers,
       body,
       duplex: "half",
-    } as any);
+    } as RequestInit);
 
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
+    const raw = await response.text();
+    let data: unknown = null;
+
+    if (raw) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        // Upstream returned plain text/HTML (e.g. Render "Not Found") — never crash on .json()
+        console.error(
+          `Proxy non-JSON response from ${url} (${response.status}):`,
+          raw.slice(0, 200)
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              response.status === 404
+                ? "Backend API not found. Check API_BASE_URL / NEXT_PUBLIC_API_BASE_URL on Render."
+                : "Backend returned a non-JSON response",
+            upstreamStatus: response.status,
+            upstreamBody: raw.slice(0, 300),
+          },
+          { status: response.status >= 400 ? response.status : 502 }
+        );
+      }
+    }
+
+    return NextResponse.json(data ?? {}, { status: response.status });
+  } catch (error: unknown) {
     console.error("Proxy error:", error);
     return NextResponse.json(
-      { success: false, message: "Proxy error connecting to backend API" },
+      {
+        success: false,
+        message: "Proxy error connecting to backend API",
+        backendBaseUrl,
+      },
       { status: 502 }
     );
   }

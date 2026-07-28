@@ -20,6 +20,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.2.0",
     "nodemailer": "^6.10.1",
+    "tsx": "^4.19.4",
     "zod": "^3.25.56"
   },
   "devDependencies": {
@@ -37,7 +38,6 @@
     "mongodb-memory-server": "^10.1.4",
     "supertest": "^7.1.0",
     "ts-jest": "^29.4.12",
-    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
 }

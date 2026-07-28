@@ -5,8 +5,9 @@ import { connectToMongoDB } from "./src/database/mongodb";
 async function bootstrap(): Promise<void> {
   await connectToMongoDB();
 
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  // Bind 0.0.0.0 so Render/Docker can reach the process (not only localhost).
+  app.listen(Number(PORT), "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

@@ -3,7 +3,8 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+# Include all deps (tsx is required by `npm start` even if NODE_ENV=production)
+RUN npm install --include=dev
 
 COPY . .
 
