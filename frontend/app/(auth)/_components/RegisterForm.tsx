@@ -6,6 +6,7 @@ import { useTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleRegisterUser } from "@/lib/actions/auth-action";
+import { NEPAL_COLLEGES } from "@/lib/colleges";
 import { registerSchema, RegisterFormValues } from "./schema";
 
 export default function RegisterForm() {
@@ -17,7 +18,7 @@ export default function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema) as any,
     defaultValues: { role: "user" },
   });
 
@@ -28,7 +29,16 @@ export default function RegisterForm() {
     const lastName = lastNameParts.join(" ") || "User";
     const username = values.email.split("@")[0].substring(0, 15) + Math.floor(Math.random() * 1000);
     const studentId = "STU-" + Date.now();
-    const payload = { firstName, lastName, email: values.email, username, studentId, password: values.password, role: values.role };
+    const payload = {
+      firstName,
+      lastName,
+      email: values.email,
+      username,
+      studentId,
+      password: values.password,
+      role: values.role,
+      college: values.college,
+    };
 
     startTransition(async () => {
       const result = await handleRegisterUser(payload);
@@ -37,16 +47,6 @@ export default function RegisterForm() {
       setTimeout(() => router.push("/login"), 1500);
     });
   };
-
-  const nepalColleges = [
-    "Tribhuvan University (TU)", "Kathmandu University (KU)", "Pokhara University (PU)",
-    "Purbanchal University", "Pulchowk Campus, IOE", "Thapathali Campus, IOE",
-    "Patan Multiple Campus", "Amrit Science Campus (ASCOL)", "Saraswati Multiple Campus",
-    "Nepal Commerce Campus", "Shanker Dev Campus", "Ratna Rajya Laxmi Campus",
-    "Birendra Multiple Campus", "Prithvi Narayan Campus", "Mahendra Multiple Campus",
-    "Butwal Multiple Campus", "Dhangadhi Multiple Campus", "Nepal Engineering College (NEC)",
-    "Himalaya College of Engineering", "Kantipur Engineering College",
-  ];
 
   // Reusable SVG icon snippets
   const EyeOpen = () => (
@@ -125,7 +125,7 @@ export default function RegisterForm() {
               <select {...register("college")}
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/30 pl-10 pr-8 text-sm text-slate-900 outline-none transition-all focus:border-m-blue-light focus:bg-white appearance-none cursor-pointer">
                 <option value="">Select your college</option>
-                {nepalColleges.map((c) => <option key={c} value={c}>{c}</option>)}
+                {NEPAL_COLLEGES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
@@ -136,9 +136,9 @@ export default function RegisterForm() {
             {errors.college && <p className="mt-1.5 text-xs text-m-red">{errors.college.message}</p>}
           </div>
 
-          {/* Role */}
+          {/* Role — Student or Event Coordinator only */}
           <div>
-            <label className="mb-2 block text-xs font-semibold text-slate-700">Role</label>
+            <label className="mb-2 block text-xs font-semibold text-slate-700">I am registering as</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -147,8 +147,8 @@ export default function RegisterForm() {
               </span>
               <select {...register("role")}
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/30 pl-10 pr-8 text-sm text-slate-900 outline-none transition-all focus:border-m-blue-light focus:bg-white appearance-none cursor-pointer">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="user">Student</option>
+                <option value="admin">Event Coordinator</option>
               </select>
               <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
@@ -156,6 +156,7 @@ export default function RegisterForm() {
                 </svg>
               </span>
             </div>
+            <p className="mt-1.5 text-xs text-slate-400">Students join events. Event Coordinators manage and create college events.</p>
             {errors.role && <p className="mt-1.5 text-xs text-m-red">{errors.role.message}</p>}
           </div>
 
