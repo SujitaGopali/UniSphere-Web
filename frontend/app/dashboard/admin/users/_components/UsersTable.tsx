@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ProfileAvatar from "@/app/components/ProfileAvatar";
 import { UserModal } from "./UserModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 
@@ -30,13 +31,26 @@ export function UsersTable({ users }: { users: any[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-hairline">
-          {users.map((user) => (
+          {users.map((user) => {
+            const initials =
+              `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase() ||
+              "U";
+
+            return (
             <tr key={user._id} className="transition-colors hover:bg-surface-elevated/50">
               <td className="px-6 py-4">
-                <div className="flex flex-col">
-                  <span className="font-medium text-on-dark">{user.firstName} {user.lastName}</span>
-                  <span className="text-xs text-muted">{user.email}</span>
-                  <span className="text-xs text-muted">@{user.username}</span>
+                <div className="flex items-center gap-3">
+                  <ProfileAvatar
+                    src={user.profileImage}
+                    initials={initials}
+                    size="sm"
+                    bgClassName="bg-slate-700 text-white"
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-medium text-on-dark">{user.firstName} {user.lastName}</span>
+                    <span className="text-xs text-muted">{user.email}</span>
+                    <span className="text-xs text-muted">@{user.username}</span>
+                  </div>
                 </div>
               </td>
               <td className="px-6 py-4">{user.studentId}</td>
@@ -44,7 +58,7 @@ export function UsersTable({ users }: { users: any[] }) {
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   user.role === 'admin' ? 'bg-m-blue-light/10 text-m-blue-light border border-m-blue-light/20' : 'bg-surface-elevated text-body-strong border border-hairline'
                 }`}>
-                  {user.role}
+                  {user.role === 'admin' ? 'Event Coordinator' : 'Student'}
                 </span>
               </td>
               <td className="px-6 py-4 text-xs whitespace-nowrap">
@@ -67,7 +81,8 @@ export function UsersTable({ users }: { users: any[] }) {
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
 
