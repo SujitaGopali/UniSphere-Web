@@ -13,6 +13,7 @@ const registrationController = new RegistrationController(registrationService);
 const router = Router();
 
 router.get("/my", authorizedMiddleware, registrationController.getMyRegistrations);
+router.get("/event/:eventId", authorizedMiddleware, registrationController.getEventRegistrations);
 router.post("/", authorizedMiddleware, registrationController.register);
 router.delete("/:id", authorizedMiddleware, registrationController.cancel);
 
