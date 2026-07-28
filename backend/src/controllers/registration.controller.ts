@@ -92,6 +92,36 @@ export class RegistrationController {
     }
   };
 
+  getEventRegistrations = async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json(ApiResponseHelper.error(401, "Unauthorized"));
+        return;
+      }
+
+      const eventId = req.params.eventId as string;
+      const userId = req.user._id.toString();
+      const userRole = req.user.role;
+      const registrations = await this.registrationService.getEventRegistrationsForViewer(
+        eventId,
+        userId,
+        userRole
+      );
+
+      res
+        .status(200)
+        .json(
+          ApiResponseHelper.success(
+            200,
+            "Event registrations retrieved successfully",
+            registrations
+          )
+        );
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
+
   private handleError(res: Response, error: any) {
     if (error instanceof HttpException) {
       res
