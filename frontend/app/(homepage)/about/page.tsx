@@ -193,13 +193,6 @@ export default function AboutPage() {
     },
   ];
 
-  const stats = [
-    { value: "2023", label: "Founded" },
-    { value: "50+", label: "Colleges" },
-    { value: "1,200+", label: "Events hosted" },
-    { value: "80K+", label: "Students reached" },
-  ];
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Banner Section */}
@@ -217,22 +210,6 @@ export default function AboutPage() {
           <p className="mx-auto max-w-2xl text-base md:text-lg text-slate-600 font-light leading-relaxed text-balance">
             Empowering educational institutions with modern event management solutions that transform how colleges organize and participate in events
           </p>
-        </div>
-      </section>
-
-      {/* Stats strip */}
-      <section className="bg-canvas border-b border-hairline py-12 px-6">
-        <div className="mx-auto max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-8">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center text-center">
-              <span className="text-2xl md:text-3xl font-bold text-on-dark tracking-tight">
-                {stat.value}
-              </span>
-              <span className="text-[11px] uppercase tracking-wide text-body mt-1">
-                {stat.label}
-              </span>
-            </div>
-          ))}
         </div>
       </section>
 

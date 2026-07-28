@@ -249,13 +249,6 @@ export default function HomePage() {
     },
   ];
 
-  const stats = [
-    { value: "50+", label: "Colleges onboard" },
-    { value: "1,200+", label: "Events hosted" },
-    { value: "80K+", label: "Check-ins processed" },
-    { value: "99.9%", label: "Uptime" },
-  ];
-
   return (
     <>
       {/* Hero Section */}
@@ -297,7 +290,7 @@ export default function HomePage() {
             your university life.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-5 mb-16">
+          <div className="flex flex-wrap justify-center gap-5">
             <Link
               href="/register"
               className="group inline-flex h-13 items-center justify-center gap-2 rounded-lg bg-white px-8 text-sm font-semibold text-m-blue-dark transition-all hover:shadow-xl hover:shadow-white/20 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -311,20 +304,6 @@ export default function HomePage() {
             >
               Login
             </Link>
-          </div>
-
-          {/* Trust / stats strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-10 gap-y-6 border-t border-white/15 pt-8 w-full max-w-2xl">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center">
-                <span className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                  {stat.value}
-                </span>
-                <span className="text-[11px] uppercase tracking-wide text-white/60 mt-1 text-center">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </section>
