@@ -86,7 +86,7 @@ export class UserController {
       }
 
       const userObj = req.user.toObject();
-      const { password: _password, ...userWithoutPassword } = userObj;
+      const { password: _password, idImage: _idImage, ...userWithoutPassword } = userObj;
 
       res
         .status(200)
@@ -116,6 +116,36 @@ export class UserController {
       res
         .status(200)
         .json(ApiResponseHelper.success(200, "Profile updated successfully", updatedUser));
+    } catch (error) {
+      if (error instanceof HttpException) {
+        res
+          .status(error.status)
+          .json(ApiResponseHelper.error(error.status, error.message));
+        return;
+      }
+      console.error(error);
+      res.status(500).json(ApiResponseHelper.error(500, "Internal server error"));
+    }
+  };
+
+  submitVerification = async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json(ApiResponseHelper.error(401, "Unauthorized"));
+        return;
+      }
+
+      if (!req.body.idImage) {
+        res.status(400).json(ApiResponseHelper.error(400, "idImage is required"));
+        return;
+      }
+
+      const userId = req.user._id.toString();
+      const updatedUser = await this.userService.submitVerification(userId, req.body.idImage);
+
+      res
+        .status(200)
+        .json(ApiResponseHelper.success(200, "Verification submitted successfully", updatedUser));
     } catch (error) {
       if (error instanceof HttpException) {
         res

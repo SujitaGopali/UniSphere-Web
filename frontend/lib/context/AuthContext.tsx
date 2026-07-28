@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "../api/axios-instance";
 import { clearAuthCookies } from "../cookies";
+import { clearLegacyVerificationCache } from "../events";
 
 interface User {
   id?: string;
@@ -15,6 +16,12 @@ interface User {
   studentId: string;
   profileImage?: string;
   role: string;
+  college?: string;
+  department?: string;
+  year?: string;
+  phoneNumber?: string;
+  interests?: string;
+  verificationStatus?: "none" | "pending" | "approved" | "rejected";
 }
 
 interface AuthContextType {
@@ -37,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await axiosInstance.get("/api/v1/auth/whoami");
       if (response.data && response.data.success) {
+        // Update React state only — avoid a server-action roundtrip on every page load.
         setUser(response.data.data);
       } else {
         setUser(null);
@@ -49,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    clearLegacyVerificationCache();
     refreshUser();
   }, []);
 
@@ -56,8 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     await clearAuthCookies();
     setUser(null);
+    clearLegacyVerificationCache();
     setIsLoading(false);
-    router.push("/login");
+    router.replace("/login");
     router.refresh();
   };
 

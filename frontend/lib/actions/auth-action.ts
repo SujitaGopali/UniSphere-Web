@@ -1,7 +1,7 @@
 "use server";
 
 import { login, register, RegisterPayload, LoginPayload } from "@/lib/api/auth";
-import { setTokenCookie, storeUserData } from "@/lib/cookies";
+import { setTokenCookie, storeUserData, StoredUserData } from "@/lib/cookies";
 import { isAxiosError } from "axios";
 
 export async function handleRegisterUser(payload: RegisterPayload) {
@@ -29,6 +29,10 @@ export async function handleRegisterUser(payload: RegisterPayload) {
       data: null,
     };
   }
+}
+
+export async function syncUserData(user: StoredUserData) {
+  await storeUserData(user);
 }
 
 export async function handleLoginUser(payload: LoginPayload) {
