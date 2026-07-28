@@ -9,5 +9,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Admins should never land on the participant dashboard
+  if (user.role === "admin") { // Event Coordinator
+    redirect("/dashboard/admin");
+  }
+
   return <DashboardClient user={user} />;
 }
