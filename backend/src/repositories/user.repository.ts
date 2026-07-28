@@ -10,6 +10,8 @@ export interface IUserRepository {
   update(id: string, data: Partial<IUser>): Promise<IUser | null>;
   countUsers(search?: string): Promise<number>;
   findAllWithPaginationAndSearch(page: number, limit: number, search?: string): Promise<IUser[]>;
+  countPendingVerifications(college?: string): Promise<number>;
+  findPendingVerifications(page: number, limit: number, college?: string): Promise<IUser[]>;
   deleteById(id: string): Promise<boolean>;
 }
 
@@ -55,7 +57,8 @@ export class UserMongoRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<IUser | null> {
-    return UserModel.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    return UserModel.findOne({ email: normalizedEmail });
   }
 
   async findByUsername(username: string): Promise<IUser | null> {
@@ -73,7 +76,11 @@ export class UserMongoRepository implements IUserRepository {
   async create(
     data: CreateUserDTOType & { password: string; role: "admin" | "user" }
   ): Promise<IUser> {
-    const user = new UserModel(data);
+    const normalizedData = {
+      ...data,
+      email: data.email.trim().toLowerCase(),
+    };
+    const user = new UserModel(normalizedData);
     return user.save();
   }
 
@@ -162,6 +169,33 @@ export class UserMongoRepository implements IUserRepository {
     ]);
 
     return rankedUsers.map((user) => UserModel.hydrate(user));
+  }
+
+  // College names are stored as free text chosen from a dropdown, so match them
+  // case-insensitively and ignore surrounding whitespace rather than exactly.
+  private buildPendingVerificationQuery(college?: string) {
+    const query: Record<string, unknown> = { verificationStatus: "pending" };
+
+    if (college?.trim()) {
+      query.college = new RegExp(`^\\s*${this.escapeRegex(college.trim())}\\s*$`, "i");
+    }
+
+    return query;
+  }
+
+  async countPendingVerifications(college?: string): Promise<number> {
+    return UserModel.countDocuments(this.buildPendingVerificationQuery(college));
+  }
+
+  async findPendingVerifications(
+    page: number,
+    limit: number,
+    college?: string
+  ): Promise<IUser[]> {
+    return UserModel.find(this.buildPendingVerificationQuery(college))
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ updatedAt: -1 });
   }
 
   async deleteById(id: string): Promise<boolean> {
