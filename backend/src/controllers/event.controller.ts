@@ -52,7 +52,22 @@ export class EventController {
       }
 
       const organizerId = req.user._id.toString();
-      const event = await this.eventService.createEvent(parsed.data, organizerId);
+      const organizerCollege = (req.user.college || "").trim();
+
+      if (!organizerCollege) {
+        res
+          .status(400)
+          .json(ApiResponseHelper.error(400, "Please update your college in your profile before creating an event"));
+        return;
+      }
+
+      const event = await this.eventService.createEvent(
+        {
+          ...parsed.data,
+          college: organizerCollege,
+        },
+        organizerId
+      );
 
       res
         .status(201)
