@@ -15,10 +15,17 @@ export async function handleRegisterUser(payload: RegisterPayload) {
     };
   } catch (error) {
     if (isAxiosError(error) && error.response?.data) {
-      const data = error.response.data as { message?: string };
+      const data = error.response.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : (data as { message?: string }).message || "Registration failed";
       return {
         success: false,
-        message: data.message || "Registration failed",
+        message:
+          message === "Not Found"
+            ? "Backend API not found. Check API_BASE_URL on Render."
+            : message,
         data: null,
       };
     }
