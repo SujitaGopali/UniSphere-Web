@@ -33,3 +33,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tests
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+coverage/
