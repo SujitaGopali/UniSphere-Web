@@ -9,6 +9,15 @@ export interface IUser extends Document {
   password: string;
   profileImage?: string;
   role: "admin" | "user";
+  college?: string;
+  department?: string;
+  year?: string;
+  phoneNumber?: string;
+  interests?: string;
+  verificationStatus: "none" | "pending" | "approved" | "rejected";
+  idImage?: string;
+  loginAlertsEnabled: boolean;
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +36,19 @@ const userSchema = new Schema<IUser>(
       enum: ["admin", "user"],
       default: "user",
     },
+    college: { type: String, required: false },
+    department: { type: String, required: false },
+    year: { type: String, required: false },
+    phoneNumber: { type: String, required: false },
+    interests: { type: String, required: false },
+    verificationStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+    },
+    idImage: { type: String, required: false },
+    loginAlertsEnabled: { type: Boolean, default: true },
+    tokenVersion: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
