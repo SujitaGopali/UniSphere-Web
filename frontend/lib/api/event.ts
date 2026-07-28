@@ -8,8 +8,20 @@ export interface EventPayload {
   description: string;
   date: string;
   location: string;
-  category: "Sports" | "Technical" | "Cultural" | "Workshop" | "Other";
+  category:
+    | "Sports"
+    | "Technical"
+    | "Cultural"
+    | "Workshop"
+    | "Other"
+    | "Literary"
+    | "Management"
+    | "Others";
+  eventType?: "Intercollegiate" | "Intracollegiate";
+  college?: string;
   capacity: number;
+  cashPrize?: string;
+  brochureImage?: string;
 }
 
 export interface EventResponse {
@@ -18,9 +30,21 @@ export interface EventResponse {
   description: string;
   date: string;
   location: string;
-  category: "Sports" | "Technical" | "Cultural" | "Workshop" | "Other";
+  category:
+    | "Sports"
+    | "Technical"
+    | "Cultural"
+    | "Workshop"
+    | "Other"
+    | "Literary"
+    | "Management"
+    | "Others";
+  eventType?: "Intercollegiate" | "Intracollegiate";
+  college?: string;
   capacity: number;
   registeredCount: number;
+  cashPrize?: string;
+  brochureImage?: string;
   organizer: {
     _id: string;
     firstName: string;

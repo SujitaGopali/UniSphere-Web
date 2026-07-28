@@ -1,6 +1,11 @@
 "use server";
 
-import { registerForEvent, cancelRegistration, getMyRegistrations } from "@/lib/api/registration";
+import {
+  registerForEvent,
+  cancelRegistration,
+  getMyRegistrations,
+  getRegistrationsByEvent,
+} from "@/lib/api/registration";
 import { isAxiosError } from "axios";
 import { revalidatePath } from "next/cache";
 
@@ -68,6 +73,23 @@ export async function handleGetMyRegistrations() {
     return {
       success: false,
       message: "Failed to retrieve your registrations.",
+      data: [],
+    };
+  }
+}
+
+export async function handleGetRegistrationsByEvent(eventId: string) {
+  try {
+    const response = await getRegistrationsByEvent(eventId);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data || [],
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to retrieve event registrations.",
       data: [],
     };
   }

@@ -18,7 +18,15 @@ const userSchema = z.object({
 
 type UserFormData = z.infer<typeof userSchema>;
 
-export function UserModal({ user, onClose }: { user?: any, onClose?: () => void }) {
+export function UserModal({
+  user,
+  onClose,
+  onSuccess,
+}: {
+  user?: any;
+  onClose?: () => void;
+  onSuccess?: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(!!user);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
@@ -55,7 +63,8 @@ export function UserModal({ user, onClose }: { user?: any, onClose?: () => void 
     setError('');
     startTransition(async () => {
       try {
-        const submitData = { ...data };
+        const submitData: Record<string, unknown> = { ...data };
+        delete submitData.profileImage;
         if (isEditing && !submitData.password) {
           delete submitData.password; // Do not send empty password if editing
         } else if (!isEditing && !submitData.password) {
@@ -63,11 +72,13 @@ export function UserModal({ user, onClose }: { user?: any, onClose?: () => void 
           return;
         }
 
-        const result = isEditing 
+        // Admin edits may change role / student ID / details — never profile image.
+        const result = isEditing
           ? await handleUpdateAdminUser(user._id, submitData)
           : await handleCreateAdminUser(submitData);
 
         if (result.success) {
+          onSuccess?.();
           handleClose();
         } else {
           setError(result.message);
@@ -141,8 +152,8 @@ export function UserModal({ user, onClose }: { user?: any, onClose?: () => void 
                 <div>
                   <label className={labelClass}>Role</label>
                   <select {...register("role")} className={fieldClass}>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">Student</option>
+                    <option value="admin">Event Coordinator (Admin)</option>
                   </select>
                   {errors.role && <span className={errClass}>{errors.role.message}</span>}
                 </div>
