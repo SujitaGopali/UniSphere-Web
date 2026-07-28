@@ -5,8 +5,21 @@ export const EventSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   date: z.string().min(1, "Date is required"),
   location: z.string().min(3, "Location must be at least 3 characters"),
-  category: z.enum(["Sports", "Technical", "Cultural", "Workshop", "Other"]),
+  category: z.enum([
+    "Sports",
+    "Technical",
+    "Cultural",
+    "Workshop",
+    "Other",
+    "Literary",
+    "Management",
+    "Others",
+  ]),
+  eventType: z.enum(["Intercollegiate", "Intracollegiate"]).optional(),
+  college: z.string().optional(),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
+  cashPrize: z.string().optional(),
+  brochureImage: z.string().optional(),
 });
 
 export type EventType = z.infer<typeof EventSchema>;
