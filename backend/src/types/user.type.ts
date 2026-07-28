@@ -8,6 +8,11 @@ export const UserSchema = z.object({
   studentId: z.string().min(1, "Student ID is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(["admin", "user"]).default("user"),
+  college: z.string().optional(),
+  department: z.string().optional(),
+  year: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  interests: z.string().optional(),
 });
 
 export type UserType = z.infer<typeof UserSchema>;
