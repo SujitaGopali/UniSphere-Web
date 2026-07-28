@@ -9,6 +9,7 @@ export const CreateUserDTO = UserSchema.pick({
   studentId: true,
   password: true,
   role: true,
+  college: true,
 });
 
 export const LoginUserDTO = UserSchema.pick({
