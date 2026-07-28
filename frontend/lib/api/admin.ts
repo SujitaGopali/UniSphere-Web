@@ -57,3 +57,33 @@ export const deleteAdminUser = async (id: string, token: string) => {
     throw new Error(error?.response?.data?.message || "Failed to delete user");
   }
 };
+
+export const getPendingVerifications = async (page: number = 1, limit: number = 50, token: string) => {
+  try {
+    const params = new URLSearchParams();
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+
+    const response = await axiosInstance.get(`${API.ADMIN_USERS.VERIFICATIONS}?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to fetch verifications");
+  }
+};
+
+export const reviewVerification = async (id: string, approved: boolean, token: string) => {
+  try {
+    const response = await axiosInstance.post(API.ADMIN_USERS.REVIEW_VERIFICATION(id), { approved }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to review verification");
+  }
+};
