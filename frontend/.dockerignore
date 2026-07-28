@@ -1,0 +1,17 @@
+node_modules
+.next
+.env
+.env.*
+.env.local
+.env*.local
+coverage
+__tests__
+playwright-report
+test-results
+*.md
+.git
+.gitignore
+.DS_Store
+npm-debug.log*
+AGENTS.md
+CLAUDE.md
