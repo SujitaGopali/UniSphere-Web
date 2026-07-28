@@ -9,6 +9,7 @@ export interface RegisterPayload {
   studentId: string;
   password: string;
   role?: string;
+  college?: string;
 }
 
 export interface LoginPayload {
@@ -35,5 +36,13 @@ export async function login(payload: LoginPayload) {
   const { data } = await axiosInstance.post<
     ApiResponse<{ token: string; user: Record<string, unknown> }>
   >(API.AUTH.LOGIN, payload);
+  return data;
+}
+
+export async function submitVerification(idImage: string) {
+  const { data } = await axiosInstance.post<ApiResponse>(
+    API.AUTH.VERIFY,
+    { idImage }
+  );
   return data;
 }
