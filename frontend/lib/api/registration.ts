@@ -6,7 +6,15 @@ import { EventResponse } from "./event";
 
 export interface RegistrationResponse {
   _id: string;
-  user: string;
+  user:
+    | string
+    | {
+        _id: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        username?: string;
+      };
   event: EventResponse;
   status: "registered" | "cancelled";
   createdAt: string;
@@ -39,6 +47,16 @@ export async function getMyRegistrations(): Promise<ApiResponse<RegistrationResp
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const { data } = await axiosInstance.get<ApiResponse<RegistrationResponse[]>>(
     API.REGISTRATIONS.MY,
+    { headers }
+  );
+  return data;
+}
+
+export async function getRegistrationsByEvent(eventId: string): Promise<ApiResponse<RegistrationResponse[]>> {
+  const token = await getTokenCookie();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const { data } = await axiosInstance.get<ApiResponse<RegistrationResponse[]>>(
+    API.REGISTRATIONS.BY_EVENT(eventId),
     { headers }
   );
   return data;
