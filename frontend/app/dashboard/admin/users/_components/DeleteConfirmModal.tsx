@@ -1,14 +1,31 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { handleDeleteAdminUser } from "@/lib/actions/admin-action";
 
-export function DeleteConfirmModal({ userId, userName, onClose }: { userId: string, userName: string, onClose: () => void }) {
+export function DeleteConfirmModal({
+  userId,
+  userName,
+  onClose,
+  onSuccess,
+}: {
+  userId: string;
+  userName: string;
+  onClose: () => void;
+  onSuccess?: () => void;
+}) {
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
 
   const handleDelete = () => {
+    setError("");
     startTransition(async () => {
-      await handleDeleteAdminUser(userId);
+      const result = await handleDeleteAdminUser(userId);
+      if (!result.success) {
+        setError(result.message || "Failed to delete user");
+        return;
+      }
+      onSuccess?.();
       onClose();
     });
   };
@@ -20,6 +37,11 @@ export function DeleteConfirmModal({ userId, userName, onClose }: { userId: stri
         <p className="text-sm text-body mb-6">
           Are you sure you want to delete <strong className="text-on-dark">{userName}</strong>? This action cannot be undone.
         </p>
+        {error && (
+          <div className="mb-4 border border-m-red bg-m-red/10 px-3 py-2 text-xs text-m-red">
+            {error}
+          </div>
+        )}
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
