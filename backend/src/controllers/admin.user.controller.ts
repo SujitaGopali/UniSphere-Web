@@ -101,4 +101,34 @@ export class AdminUserController {
       );
     }
   }
+
+  async getPendingVerifications(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page?.toString() || "1");
+      const limit = parseInt(req.query.limit?.toString() || "50");
+      const college = req.user?.college;
+
+      const result = await userService.getPendingVerifications(page, limit, college);
+      return res.status(200).json(ApiResponseHelper.success(200, "Pending verifications fetched", result.verifications, result.meta));
+    } catch (error: any) {
+      return res.status(error.status || 500).json(
+        ApiResponseHelper.error(error.status || 500, error.message || "Internal Server Error")
+      );
+    }
+  }
+
+  async reviewVerification(req: Request, res: Response) {
+    try {
+      const id = req.params.id as string;
+      const approved = req.body.approved === true;
+      const reviewerCollege = req.user?.college;
+
+      const result = await userService.reviewVerification(id, approved, reviewerCollege);
+      return res.status(200).json(ApiResponseHelper.success(200, `Verification ${approved ? 'approved' : 'rejected'}`, result));
+    } catch (error: any) {
+      return res.status(error.status || 500).json(
+        ApiResponseHelper.error(error.status || 500, error.message || "Internal Server Error")
+      );
+    }
+  }
 }
