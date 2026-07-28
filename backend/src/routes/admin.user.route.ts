@@ -15,4 +15,8 @@ adminUserRoutes.put("/:id", adminUserController.updateUser);
 adminUserRoutes.patch("/:id", adminUserController.updateUser);
 adminUserRoutes.delete("/:id", adminUserController.deleteUser);
 
+// Verification routes
+adminUserRoutes.get("/verifications/pending", adminUserController.getPendingVerifications);
+adminUserRoutes.post("/verifications/:id/review", adminUserController.reviewVerification);
+
 export default adminUserRoutes;
