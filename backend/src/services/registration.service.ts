@@ -66,4 +66,29 @@ export class RegistrationService {
   async getEventRegistrations(eventId: string) {
     return this.registrationRepository.findByEvent(eventId);
   }
+
+  async getEventRegistrationsForViewer(
+    eventId: string,
+    userId: string,
+    userRole: string
+  ) {
+    const event = await this.eventRepository.findById(eventId);
+    if (!event) {
+      throw new HttpException(404, "Event not found");
+    }
+
+    const organizerIdStr =
+      event.organizer && typeof event.organizer === "object" && "_id" in event.organizer
+        ? (event.organizer as any)._id.toString()
+        : event.organizer.toString();
+
+    if (organizerIdStr !== userId && userRole !== "admin") {
+      throw new HttpException(
+        403,
+        "You do not have permission to view registrations for this event"
+      );
+    }
+
+    return this.registrationRepository.findByEvent(eventId);
+  }
 }
