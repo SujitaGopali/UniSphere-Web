@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { clearAuthCookies } from "@/lib/cookies";
 import Image from "next/image";
+import ProfileAvatar from "@/app/components/ProfileAvatar";
 import { useAuth } from "@/lib/context/AuthContext";
+import { useState, useEffect } from "react";
+import IdVerificationModal from "./IdVerificationModal";
+import { filterEventsForUser } from "@/lib/events";
+import { getEvents } from "@/lib/api/event";
+import { handleGetMyRegistrations } from "@/lib/actions/registration-action";
+import { UiEventItem, toUiEventItems } from "@/lib/event-helpers";
 
 interface DashboardClientProps {
   user: Record<string, any>;
@@ -19,16 +26,16 @@ const SVG = ({ children }: { children: React.ReactNode }) => (
 
 const navItems = [
   {
+    label: "Dashboard", href: "/dashboard",
+    icon: <SVG><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></SVG>,
+  },
+  {
     label: "Feed", href: "/dashboard/feed",
     icon: <SVG><path d="M4 6h16M4 10h16M4 14h10" /></SVG>,
   },
   {
     label: "Discover", href: "/dashboard/discover",
     icon: <SVG><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></SVG>,
-  },
-  {
-    label: "Dashboard", href: "/dashboard",
-    icon: <SVG><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></SVG>,
   },
   {
     label: "My Events", href: "/dashboard/my-events",
@@ -85,16 +92,45 @@ const quickActions = [
 export default function DashboardClient({ user: serverUser }: DashboardClientProps) {
   const router   = useRouter();
   const pathname = usePathname();
-  const { user: contextUser } = useAuth();
+  const { user: contextUser, logout, refreshUser } = useAuth();
+
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+
+  const [recommendedEvents, setRecommendedEvents] = useState<UiEventItem[]>([]);
+  const [registeredCount, setRegisteredCount] = useState(0);
 
   const user     = contextUser || serverUser;
   const initials = `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase() || "U";
   const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User";
+  const userCollege = user.college || "Herald College Kathmandu";
+  // Comes straight from the account record, so it always matches what the
+  // coordinator sees in their review queue.
+  const verificationStatus = user.verificationStatus || "none";
+
+  useEffect(() => {
+    const load = async () => {
+      if (user?.email) {
+        const registrationsResult = await handleGetMyRegistrations();
+        if (registrationsResult.success) {
+          setRegisteredCount(registrationsResult.data.length);
+        }
+      }
+
+      const eventsResult = await getEvents();
+      if (eventsResult.success) {
+        const events = toUiEventItems(eventsResult.data || []);
+        setRecommendedEvents(filterEventsForUser(events, userCollege));
+      }
+    };
+
+    load();
+  }, [userCollege, user?.email]);
+
+  const isVerified = verificationStatus === "approved";
+  const isPendingVerification = verificationStatus === "pending";
 
   const handleLogout = async () => {
-    await clearAuthCookies();
-    router.push("/login");
-    router.refresh();
+    await logout();
   };
 
   return (
@@ -138,13 +174,17 @@ export default function DashboardClient({ user: serverUser }: DashboardClientPro
         {/* User info */}
         <div className="border-t border-slate-100 px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white text-sm font-semibold overflow-hidden">
-              {user.profileImage
-                ? <Image src={user.profileImage} alt="Avatar" fill sizes="36px" className="object-cover" />
-                : initials}
-            </div>
+            <ProfileAvatar src={user.profileImage} initials={initials} size="sm" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-800">{fullName}</p>
+              <div className="flex items-center gap-1">
+                <p className="truncate text-sm font-semibold text-slate-800">{fullName}</p>
+                {isVerified && (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-blue-500">
+                    <title>Verified Student</title>
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.3 14.7L6.5 12.5l1.4-1.4 2.8 2.8 6.8-6.8 1.4 1.4-8.2 8.2z" />
+                  </svg>
+                )}
+              </div>
               <p className="truncate text-xs text-slate-400">{user.email || ""}</p>
             </div>
           </div>
@@ -181,11 +221,50 @@ export default function DashboardClient({ user: serverUser }: DashboardClientPro
 
         {/* Welcome */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">
-            Welcome back, {user.firstName || "User"}! 👋
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-800">
+              Welcome back, {user.firstName || "User"}!
+            </h1>
+            {isVerified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-200">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.3 14.7L6.5 12.5l1.4-1.4 2.8 2.8 6.8-6.8 1.4 1.4-8.2 8.2z" /></svg>
+                Verified Student
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-slate-500">Here&apos;s what&apos;s happening with your events</p>
         </div>
+
+        {/* Verification Banner */}
+        {!isVerified && (
+          <div className={`mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-5 shadow-sm ${
+            isPendingVerification
+              ? "border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50"
+              : "border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50"
+          }`}>
+            <div>
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 ${isPendingVerification ? "text-amber-600" : "text-blue-600"}`}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                {isPendingVerification ? "Verification Pending" : "Verify your Student ID"}
+              </h3>
+              <p className="text-sm text-slate-600 mt-1 max-w-xl">
+                {isPendingVerification
+                  ? "Your ID is under review by your event coordinator. You'll get access to priority registration once approved."
+                  : "Upload your college ID card to get verified. Verified students get priority access to limited-seat events and exclusive campus updates."}
+              </p>
+            </div>
+            {!isPendingVerification && (
+              <button 
+                onClick={() => setIsVerifyModalOpen(true)}
+                className="shrink-0 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors"
+              >
+                Verify Now
+              </button>
+            )}
+          </div>
+        )}
 
 
         {/* Stat cards */}
@@ -193,7 +272,9 @@ export default function DashboardClient({ user: serverUser }: DashboardClientPro
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
               <div className="mb-3">{stat.icon}</div>
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className={`text-2xl font-bold ${stat.color}`}>
+                {stat.label === "Registered Events" ? registeredCount : stat.value}
+              </p>
               <p className="mt-1 text-xs text-slate-400">{stat.label}</p>
             </div>
           ))}
@@ -216,20 +297,61 @@ export default function DashboardClient({ user: serverUser }: DashboardClientPro
         {/* Recommended For You */}
         <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">Recommended For You</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">Recommended For You</h2>
+              <p className="text-xs text-slate-400">Events from {userCollege} & Intercollege events</p>
+            </div>
             <Link href="/dashboard/discover" className="text-xs font-medium text-violet-600 hover:text-violet-800 transition-colors">
               Explore More →
             </Link>
           </div>
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10 text-slate-200 mb-3">
-              <rect x="3" y="4.5" width="18" height="16" rx="2" /><path d="M3 9.5h18" /><path d="M8 2.5v4M16 2.5v4" />
-            </svg>
-            <p className="text-sm text-slate-400">No events to show yet.</p>
-            <p className="text-xs text-slate-300 mt-1">Check back soon or explore upcoming events.</p>
-          </div>
+
+          {recommendedEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recommendedEvents.slice(0, 4).map((evt) => (
+                <div key={evt.id} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm hover:border-violet-200 transition-all border-l-4 border-l-violet-500 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-[11px] font-semibold text-violet-600 border border-violet-100">
+                        {evt.category}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                        {evt.eventType}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-1">{evt.title}</h3>
+                    <p className="text-xs font-medium text-blue-600 mb-2">{evt.college}</p>
+                    <p className="text-xs text-slate-500 line-clamp-2 mb-3">{evt.description}</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>{new Date(evt.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                    <Link href="/dashboard/feed" className="font-semibold text-violet-600 hover:underline">View in Feed</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10 text-slate-200 mb-3">
+                <rect x="3" y="4.5" width="18" height="16" rx="2" /><path d="M3 9.5h18" /><path d="M8 2.5v4M16 2.5v4" />
+              </svg>
+              <p className="text-sm text-slate-400">No events to show yet.</p>
+              <p className="text-xs text-slate-300 mt-1">Check back soon or explore upcoming events.</p>
+            </div>
+          )}
         </div>
       </main>
+
+      <IdVerificationModal 
+        isOpen={isVerifyModalOpen} 
+        onClose={() => setIsVerifyModalOpen(false)} 
+        onSubmitted={async () => {
+          await refreshUser();
+          setIsVerifyModalOpen(false);
+        }}
+        user={user}
+      />
     </div>
   );
 }
